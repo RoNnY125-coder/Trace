@@ -82,6 +82,16 @@ function openModal(id) {
 
 function closeModal(id) {
     document.getElementById(id).classList.remove('active');
+    const errorMap = {
+        newCaseModal: 'newCaseError',
+        newPersonModal: 'newPersonError',
+        uploadPhotoModal: 'uploadPhotoError',
+        uploadVideoModal: 'uploadVideoError',
+    };
+    if (errorMap[id]) {
+        const errDiv = document.getElementById(errorMap[id]);
+        if (errDiv) { errDiv.style.display = 'none'; errDiv.textContent = ''; }
+    }
 }
 
 function handleFileSelected(input, labelId) {
@@ -216,9 +226,17 @@ async function loadCases() {
 
 async function handleCreateCase(e) {
     e.preventDefault();
+    const errorDiv = document.getElementById('newCaseError');
+    errorDiv.style.display = 'none';
     const case_number = document.getElementById('caseNumber').value.trim();
     const title = document.getElementById('caseTitle').value.trim();
     const description = document.getElementById('caseDescription').value.trim();
+
+    if (!case_number) {
+        errorDiv.textContent = 'Case number is required and cannot be empty.';
+        errorDiv.style.display = 'block';
+        return;
+    }
 
     try {
         const res = await fetch(`${API_BASE}/cases`, {
@@ -229,7 +247,9 @@ async function handleCreateCase(e) {
 
         if (!res.ok) {
             const err = await res.json();
-            throw new Error(err.detail || 'Failed to create case');
+            errorDiv.textContent = err.detail || 'Failed to create case';
+            errorDiv.style.display = 'block';
+            return;
         }
 
         showToast('Case created successfully!');
@@ -238,7 +258,8 @@ async function handleCreateCase(e) {
         loadCases();
         loadDashboard();
     } catch (err) {
-        showToast(err.message, true);
+        errorDiv.textContent = err.message || 'Network error. Is the server running?';
+        errorDiv.style.display = 'block';
     }
 }
 
@@ -307,12 +328,20 @@ async function loadPersons() {
 
 async function handleCreatePerson(e) {
     e.preventDefault();
+    const errorDiv = document.getElementById('newPersonError');
+    errorDiv.style.display = 'none';
     const case_id = parseInt(document.getElementById('personCaseId').value);
     const name = document.getElementById('personName').value.trim();
     const age = parseInt(document.getElementById('personAge').value) || null;
     const gender = document.getElementById('personGender').value || null;
     const last_known_location = document.getElementById('personLocation').value.trim() || null;
     const description = document.getElementById('personDescription').value.trim() || null;
+
+    if (!name) {
+        errorDiv.textContent = 'Person name is required.';
+        errorDiv.style.display = 'block';
+        return;
+    }
 
     try {
         const res = await fetch(`${API_BASE}/persons`, {
@@ -323,7 +352,9 @@ async function handleCreatePerson(e) {
 
         if (!res.ok) {
             const err = await res.json();
-            throw new Error(err.detail || 'Failed to register person');
+            errorDiv.textContent = err.detail || 'Failed to register person';
+            errorDiv.style.display = 'block';
+            return;
         }
 
         const newPerson = await res.json();
@@ -336,7 +367,8 @@ async function handleCreatePerson(e) {
         // Immediately prompt for photo upload
         openPhotoUploadModal(newPerson.id);
     } catch (err) {
-        showToast(err.message, true);
+        errorDiv.textContent = err.message || 'Network error. Is the server running?';
+        errorDiv.style.display = 'block';
     }
 }
 
@@ -349,12 +381,15 @@ function openPhotoUploadModal(personId) {
 
 async function handleUploadPhoto(e) {
     e.preventDefault();
+    const errorDiv = document.getElementById('uploadPhotoError');
+    errorDiv.style.display = 'none';
     const personId = document.getElementById('uploadPhotoPersonId').value;
     const fileInput = document.getElementById('personPhotoInput');
     const btn = document.getElementById('btnUploadPhoto');
 
     if (!fileInput.files || !fileInput.files[0]) {
-        showToast('Please select a photo file', true);
+        errorDiv.textContent = 'Please select a photo file.';
+        errorDiv.style.display = 'block';
         return;
     }
 
@@ -372,7 +407,9 @@ async function handleUploadPhoto(e) {
 
         if (!res.ok) {
             const err = await res.json();
-            throw new Error(err.detail || 'Failed to upload photo');
+            errorDiv.textContent = err.detail || 'Failed to upload photo';
+            errorDiv.style.display = 'block';
+            return;
         }
 
         showToast('Face detected and 512-D embedding saved to PostgreSQL!');
@@ -380,7 +417,8 @@ async function handleUploadPhoto(e) {
         loadPersons();
         loadDashboard();
     } catch (err) {
-        showToast(err.message, true);
+        errorDiv.textContent = err.message || 'Network error. Is the server running?';
+        errorDiv.style.display = 'block';
     } finally {
         btn.disabled = false;
         btn.innerHTML = 'Extract & Store Embedding';
@@ -443,6 +481,8 @@ async function loadVideos() {
 
 async function handleUploadVideo(e) {
     e.preventDefault();
+    const errorDiv = document.getElementById('uploadVideoError');
+    errorDiv.style.display = 'none';
     const camera_name = document.getElementById('videoCameraName').value.trim();
     const location = document.getElementById('videoLocation').value.trim();
     const case_id = document.getElementById('videoCaseId').value;
@@ -450,7 +490,14 @@ async function handleUploadVideo(e) {
     const btn = document.getElementById('btnUploadVideo');
 
     if (!fileInput.files || !fileInput.files[0]) {
-        showToast('Please select a video file', true);
+        errorDiv.textContent = 'Please select a video file.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    if (!camera_name) {
+        errorDiv.textContent = 'Camera name is required.';
+        errorDiv.style.display = 'block';
         return;
     }
 
@@ -471,7 +518,9 @@ async function handleUploadVideo(e) {
 
         if (!res.ok) {
             const err = await res.json();
-            throw new Error(err.detail || 'Failed to upload video');
+            errorDiv.textContent = err.detail || 'Failed to upload video';
+            errorDiv.style.display = 'block';
+            return;
         }
 
         const newVideo = await res.json();
@@ -486,7 +535,8 @@ async function handleUploadVideo(e) {
             startVideoProcessing(newVideo.id);
         }
     } catch (err) {
-        showToast(err.message, true);
+        errorDiv.textContent = err.message || 'Network error. Is the server running?';
+        errorDiv.style.display = 'block';
     } finally {
         btn.disabled = false;
         btn.innerHTML = 'Upload CCTV Video';

@@ -242,10 +242,11 @@
                 <h3>Create New Case</h3>
                 <button class="close-btn" onclick="closeModal('newCaseModal')">&times;</button>
             </div>
+            <div id="newCaseError" class="modal-alert-error" style="display:none;"></div>
             <form id="newCaseForm" onsubmit="handleCreateCase(event)">
                 <div class="form-group">
                     <label>Case Number / Code *</label>
-                    <input type="text" id="caseNumber" required placeholder="e.g. CASE-2026-001" class="form-input">
+                    <input type="text" id="caseNumber" required placeholder="e.g. CASE-2026-002" class="form-input">
                 </div>
                 <div class="form-group">
                     <label>Title</label>
@@ -270,6 +271,7 @@
                 <h3>Register Missing Person</h3>
                 <button class="close-btn" onclick="closeModal('newPersonModal')">&times;</button>
             </div>
+            <div id="newPersonError" class="modal-alert-error" style="display:none;"></div>
             <form id="newPersonForm" onsubmit="handleCreatePerson(event)">
                 <div class="form-group">
                     <label>Assign to Case *</label>
@@ -319,6 +321,7 @@
                 <h3>Upload Reference Photo</h3>
                 <button class="close-btn" onclick="closeModal('uploadPhotoModal')">&times;</button>
             </div>
+            <div id="uploadPhotoError" class="modal-alert-error" style="display:none;"></div>
             <form id="uploadPhotoForm" onsubmit="handleUploadPhoto(event)">
                 <input type="hidden" id="uploadPhotoPersonId">
                 <p class="text-muted mb-2">Upload a clear frontal face photograph. ArcFace will detect the face and extract a 512-D embedding.</p>
@@ -342,6 +345,7 @@
                 <h3>Upload CCTV Footage</h3>
                 <button class="close-btn" onclick="closeModal('uploadVideoModal')">&times;</button>
             </div>
+            <div id="uploadVideoError" class="modal-alert-error" style="display:none;"></div>
             <form id="uploadVideoForm" onsubmit="handleUploadVideo(event)">
                 <div class="form-row">
                     <div class="form-group">

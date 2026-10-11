@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Trace - Missing Person Identification System"
@@ -16,10 +16,11 @@ class Settings(BaseSettings):
     )
 
     # Storage paths
-    STORAGE_DIR: Path = PROJECT_ROOT / "storage"
-    PHOTOS_DIR: Path = STORAGE_DIR / "photos"
-    VIDEOS_DIR: Path = STORAGE_DIR / "videos"
-    SNAPSHOTS_DIR: Path = STORAGE_DIR / "snapshots"
+    PROJECT_ROOT: Path = _PROJECT_ROOT
+    STORAGE_DIR: Path = _PROJECT_ROOT / "storage"
+    PHOTOS_DIR: Path = _PROJECT_ROOT / "storage" / "photos"
+    VIDEOS_DIR: Path = _PROJECT_ROOT / "storage" / "videos"
+    SNAPSHOTS_DIR: Path = _PROJECT_ROOT / "storage" / "snapshots"
 
     # AI & Face Matching Parameters
     INSIGHTFACE_MODEL: str = "buffalo_l"

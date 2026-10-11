@@ -7,17 +7,22 @@ from app.schemas.case import CaseCreate, CaseUpdate, CaseResponse
 
 router = APIRouter(prefix="/cases", tags=["Cases"])
 
+from sqlalchemy import func
+
 @router.post("", response_model=CaseResponse, status_code=status.HTTP_201_CREATED)
 def create_case(case_in: CaseCreate, db: Session = Depends(get_db)):
     """Create a new missing person investigation case."""
-    existing = db.query(Case).filter(Case.case_number == case_in.case_number).first()
+    clean_number = case_in.case_number.strip()
+    existing = db.query(Case).filter(func.lower(Case.case_number) == clean_number.lower()).first()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Case with number '{case_in.case_number}' already exists."
+            detail=f"Case with number '{clean_number}' already exists. Please use a different case code."
         )
 
-    case = Case(**case_in.model_dump())
+    case_data = case_in.model_dump()
+    case_data["case_number"] = clean_number
+    case = Case(**case_data)
     db.add(case)
     db.commit()
     db.refresh(case)
